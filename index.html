@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulated Job Board ATS Integration</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1, h2 { color: #0056b3; }
+        .job-board { border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; background-color: #e9f7ff; }
+        .job-board h3 { margin-top: 0; color: #007bff; }
+        .ats-status { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; padding: 15px; border-radius: 5px; margin-top: 30px; }
+        button { background-color: #28a745; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+        button:hover { background-color: #218838; }
+        .application-log { margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 10px; }
+        .application-log p { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Simulated Job Board Ecosystem</h1>
+        <p>This example demonstrates how different job board brands can utilize a single, shared Applicant Tracking System (ATS) backend, a common "hidden truth" in recruitment tech.</p>
+
+        <!-- Simulated Job Board A -->
+        <div class="job-board" id="jobBoardA">
+            <h3>TechJobs.com - Your Gateway to Tech Careers</h3>
+            <h4>Software Engineer - Frontend</h4>
+            <p>Join our innovative team building cutting-edge web applications. Requires strong JavaScript and React skills.</p>
+            <button onclick="applyToJob('TechJobs.com', 'Software Engineer - Frontend', 'Alice Smith')">Apply Now (Alice Smith)</button>
+            <div class="application-log" id="logA"></div>
+        </div>
+
+        <!-- Simulated Job Board B -->
+        <div class="job-board" id="jobBoardB">
+            <h3>CareerHub.net - Find Your Next Opportunity</h3>
+            <h4>Senior Backend Developer</h4>
+            <p>We're looking for an experienced Python developer to scale our microservices. AWS experience a plus.</p>
+            <button onclick="applyToJob('CareerHub.net', 'Senior Backend Developer', 'Bob Johnson')">Apply Now (Bob Johnson)</button>
+            <div class="application-log" id="logB"></div>
+        </div>
+
+        <!-- Central ATS Backend Status -->
+        <div class="ats-status">
+            <h2>Central ATS Backend Processing</h2>
+            <p>All applications, regardless of the job board they came from, are processed by this central ATS.</p>
+            <div id="atsLog">
+                <!-- ATS processed applications will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Simulated Central ATS Backend ---
+        // This object represents the shared Applicant Tracking System (ATS) logic.
+        // It processes applications received from various "job boards".
+        const centralATS = {
+            applications: [], // Stores all received applications
+            atsLogElement: document.getElementById('atsLog'),
+
+            /**
+             * Receives and processes an application from a job board.
+             * @param {string} sourceBoard - The name of the job board the application originated from.
+             * @param {string} jobTitle - The title of the job applied for.
+             * @param {string} applicantName - The name of the applicant.
+             */
+            receiveApplication: function(sourceBoard, jobTitle, applicantName) {
+                const timestamp = new Date().toLocaleTimeString();
+                const application = {
+                    applicant: applicantName,
+                    job: jobTitle,
+                    source: sourceBoard,
+                    receivedAt: timestamp
+                };
+                this.applications.push(application); // Store application in ATS
+                this.updateATSLog(application);      // Update the central ATS display
+                console.log(`ATS received: ${applicantName} for ${jobTitle} from ${sourceBoard} at ${timestamp}`);
+
+                // Simulate some ATS processing (e.g., resume parsing, initial screening)
+                // In a real ATS, this would involve complex logic.
+                setTimeout(() => {
+                    this.processApplication(application);
+                }, 500); // Simulate a small delay for processing
+            },
+
+            /**
+             * Simulates further processing of an application by the ATS.
+             * @param {object} application - The application object.
+             */
+            processApplication: function(application) {
+                const processingMessage = `✅ ATS processed ${application.applicant}'s application for '${application.job}' (Source: ${application.source}).`;
+                const logEntry = document.createElement('p');
+                logEntry.innerHTML = processingMessage;
+                this.atsLogElement.appendChild(logEntry);
+            },
+
+            /**
+             * Updates the display for the central ATS log.
+             * @param {object} application - The application object.
+             */
+            updateATSLog: function(application) {
+                const initialMessage = document.createElement('p');
+                initialMessage.innerHTML = `➡️ New application received by ATS: <strong>${application.applicant}</strong> for <em>${application.job}</em> from <strong>${application.source}</strong>.`;
+                this.atsLogElement.appendChild(initialMessage);
+            }
+        };
+
+        // --- Global function called by job board buttons ---
+        /**
+         * Simulates an applicant applying for a job.
+         * This function acts as the "front-end" submission point for each job board.
+         * @param {string} boardName - The name of the job board (e.g., "TechJobs.com").
+         * @param {string} jobTitle - The title of the job.
+         * @param {string} applicantName - The name of the applicant.
+         */
+        function applyToJob(boardName, jobTitle, applicantName) {
+            // Display immediate feedback on the specific job board
+            const logElementId = (boardName === 'TechJobs.com') ? 'logA' : 'logB';
+            const logElement = document.getElementById(logElementId);
+            logElement.innerHTML = `<p><em>${applicantName}</em> applied for <em>${jobTitle}</em> on <strong>${boardName}</strong>. Submitting to ATS...</p>`;
+
+            // The key concept: Both job boards use the SAME centralATS instance.
+            centralATS.receiveApplication(boardName, jobTitle, applicantName);
+        }
+    </script>
+</body>
+</html>
